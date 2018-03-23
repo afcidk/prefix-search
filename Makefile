@@ -38,11 +38,17 @@ test_%: test_%.o $(OBJS_LIB)
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
+	@astyle --style=kr --indent=spaces=4 --suffix=none $*.c
 	$(VECHO) "  CC\t$@\n"
 	$(Q)$(CC) -o $@ $(CFLAGS) -c -MMD -MF .$@.d $<
 
 clean:
 	$(RM) $(TESTS) $(OBJS)
 	$(RM) $(deps)
+
+bench:
+	./test_cpy --bench
+	./test_ref --bench
+
 
 -include $(deps)

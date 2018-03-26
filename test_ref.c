@@ -36,6 +36,7 @@ static void rmcrlf(char *s)
 
 int main(int argc, char **argv)
 {
+
     char word[WRDMAX] = "";
     char *sgl[LMAX] = {NULL};
     tst_node *root = NULL, *res = NULL;
@@ -50,9 +51,8 @@ int main(int argc, char **argv)
 
     t1 = tvgetf();
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
-        char *p = word;
-        /* FIXME: insert reference to each string */
-        if (!tst_ins_del(&root, &p, INS, CPY)) {
+        char *p = strdup(word);
+        if (!tst_ins_del(&root, &p, INS, REF)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
@@ -62,7 +62,16 @@ int main(int argc, char **argv)
     t2 = tvgetf();
 
     fclose(fp);
+
+    /* test bench */
+    if (argc >= 2 && !strncmp(argv[1], "--bench", 7)) {
+        if (argc >= 3) tst_search_prefix(root, argv[2], sgl, &sidx, LMAX);
+        else tst_search_prefix(root, "Tai", sgl, &sidx, LMAX);
+        return 0;
+    }
+
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
+
 
     for (;;) {
         char *p;
@@ -86,8 +95,7 @@ int main(int argc, char **argv)
             rmcrlf(word);
             p = word;
             t1 = tvgetf();
-            /* FIXME: insert reference to each string */
-            res = tst_ins_del(&root, &p, INS, CPY);
+            res = tst_ins_del(&root, &p, INS, REF);
             t2 = tvgetf();
             if (res) {
                 idx++;
@@ -138,8 +146,7 @@ int main(int argc, char **argv)
             p = word;
             printf("  deleting %s\n", word);
             t1 = tvgetf();
-            /* FIXME: remove reference to each string */
-            res = tst_ins_del(&root, &p, DEL, CPY);
+            res = tst_ins_del(&root, &p, DEL, REF);
             t2 = tvgetf();
             if (res)
                 printf("  delete failed.\n");

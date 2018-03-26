@@ -47,8 +47,10 @@ clean:
 	$(RM) $(deps)
 
 bench:
-	./test_cpy --bench
-	./test_ref --bench
+	perf stat --repeat 100 \
+	-e cache-misses,cache-references,instructions,cycles ./test_cpy --bench
+	perf stat --repeat 100 \
+	-e cache-misses,cache-references,instructions,cycles ./test_ref --bench
 
 
 -include $(deps)

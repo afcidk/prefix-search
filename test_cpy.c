@@ -61,6 +61,14 @@ int main(int argc, char **argv)
     t2 = tvgetf();
 
     fclose(fp);
+
+    /* test bench */
+    if (argc >= 2 && !strncmp(argv[1], "--bench", 7)) {
+        if (argc >= 3) tst_search_prefix(root, argv[2], sgl, &sidx, LMAX);
+        else tst_search_prefix(root, "Tai", sgl, &sidx, LMAX);
+        return 0;
+    }
+
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
 
     for (;;) {

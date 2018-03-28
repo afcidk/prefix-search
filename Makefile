@@ -24,7 +24,7 @@ $(GIT_HOOKS):
 	@echo
 
 OBJS_LIB = \
-    tst.o
+	tst.o
 
 OBJS := \
     $(OBJS_LIB) \
@@ -42,15 +42,20 @@ test_%: test_%.o $(OBJS_LIB)
 	$(VECHO) "  CC\t$@\n"
 	$(Q)$(CC) -o $@ $(CFLAGS) -c -MMD -MF .$@.d $<
 
+tinput.txt:
+	scripts/gen.py
+
 clean:
 	$(RM) $(TESTS) $(OBJS)
 	$(RM) $(deps)
+	$(RM) ref_bench.txt cpy_bench.txt runtime.png tinput.txt runtime.png
 
-bench:
-	perf stat --repeat 100 \
-	-e cache-misses,cache-references,instructions,cycles ./test_cpy --bench
-	perf stat --repeat 100 \
-	-e cache-misses,cache-references,instructions,cycles ./test_ref --bench
+plot: bench
+	gnuplot scripts/runtime.gp
+
+bench: $(TESTS) tinput.txt
+	./test_cpy --bench
+	./test_ref --bench
 
 
 -include $(deps)

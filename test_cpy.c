@@ -33,6 +33,8 @@ static void rmcrlf(char *s)
 }
 
 #define IN_FILE "cities.txt"
+#define TEST_INPUT "tinput.txt"
+#define TEST_OUTPUT "cpy_bench.txt"
 
 int main(int argc, char **argv)
 {
@@ -51,6 +53,7 @@ int main(int argc, char **argv)
     t1 = tvgetf();
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
         char *p = word;
+        if (word[strlen(word)-1] == ',') word[strlen(word)-1] = 0;
         if (!tst_ins_del(&root, &p, INS, CPY)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
@@ -64,8 +67,34 @@ int main(int argc, char **argv)
 
     /* test bench */
     if (argc >= 2 && !strncmp(argv[1], "--bench", 7)) {
-        if (argc >= 3) tst_search_prefix(root, argv[2], sgl, &sidx, LMAX);
-        else tst_search_prefix(root, "Tai", sgl, &sidx, LMAX);
+        fp = fopen(TEST_INPUT, "r");
+        int cnt = 0;
+
+        if (!fp) {
+            fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
+            return 1;
+        }
+
+        FILE *fp2 = fopen(TEST_OUTPUT, "w");
+        if (!fp2) {
+            fclose(fp);
+            fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
+            return 1;
+        }
+
+
+        while (fscanf(fp, "%s", word) != EOF) {
+            t1 = tvgetf();
+            tst_search_prefix(root, word, sgl, &sidx, LMAX);
+            t2 = tvgetf();
+
+            /* save for gnuplot */
+            fprintf(fp2, "%d %.6f\n", ++cnt, t2 - t1);
+            printf("%d %.6f\n", cnt, t2 - t1);
+        }
+        fclose(fp);
+        fclose(fp2);
+
         return 0;
     }
 

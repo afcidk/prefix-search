@@ -321,7 +321,7 @@ void tst_suggest(const tst_node *p,
                  int *n,
                  const int max)
 {
-    if (!p || *n == max)
+    if (!p || *n >= max)
         return;
     tst_suggest(p->lokid, c, nchr, a, n, max);
     if (p->key)
